@@ -1,0 +1,33 @@
+{
+
+  "manifest_version": 2,
+  "name": "Bookmark Detector",
+  "version": "0.1",
+
+  "description": "Detects and removes duplicate bookmarks on add and shows a notification about it.",
+
+  "permissions": [
+    "bookmarks",
+    "notifications"
+  ],
+
+  "icons": {
+    "48": "icons/bd-on-48.png",
+    "36": "icons/bd-on-36.png",
+    "18": "icons/bd-on-18.png"
+  },
+  
+   "browser_action": {
+		"default_icon": {
+			"48": "icons/bd-on-48.png",
+			"36": "icons/bd-on-36.png",
+			"18": "icons/bd-on-18.png"
+		},
+		"default_title": "ON - Bookmark Detector"
+  },
+
+  "background": {
+	"scripts": ["bookdetect.js"]
+	}
+
+}
