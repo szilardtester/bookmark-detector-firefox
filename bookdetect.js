@@ -26,28 +26,29 @@ function toggleOnOff(){
 // Search for the newly created bookmark's url.
 function searchForDupes(id, bookmarkInfo) {
 
-	// Consider urls diff only after '#' to be identical
-	let indexOfHashSym = bookmarkInfo.url.indexOf("#"); // Returns -1 if not found
-	let searchFor = (indexOfHashSym < 0) ? bookmarkInfo.url : bookmarkInfo.url.slice(0, indexOfHashSym);
-
-	let searching = browser.bookmarks.search(searchFor);
+	// Consider urls diff only after '#' to be identical -> slice the url at '#' then search.
+	let searching = browser.bookmarks.search(sliceAtHash(bookmarkInfo.url));
 	searching.then(onSearchFulfilled, onSearchRejected);
 
 }
 
 // Check if the newly created bookmark is a duplicate of other(s) created earlier.
 function onSearchFulfilled(bookmarkItems) {
+	
+	// Get rid of parts after '#' and filter out urls longer than our fresh one (therefore aren't dupes just are from the same domain).
+	const freshUrlLength = (sliceAtHash(bookmarkItems[bookmarkItems.length - 1].url)).length;
+	let filteredResults = bookmarkItems.filter(bookmark => (((sliceAtHash(bookmark.url)).length) == freshUrlLength));
 
 	// Freshly created is the last element of the return array.
-	let lastIdx = bookmarkItems.length - 1;
-	let lastBookmark = bookmarkItems[lastIdx];
+	let lastIdx = filteredResults.length - 1;
+	let lastBookmark = filteredResults[lastIdx];
 
 	if (lastIdx > 0) { // We have at least 1 dupe -> go ahead.
 
 		// Create the notification message here. Listing the freshly added as 'dupe', older(s) as 'original'
 		let content = 	`---DUPE---\r\n Title: ${lastBookmark.title},\r\n Url: ${lastBookmark.url}`;
 		for (i = (lastIdx - 1); i > -1; i--) {
-			content += `\r\n---ORIG---\r\n Title: ${bookmarkItems[i].title},\r\n Url: ${bookmarkItems[i].url}`;
+			content += `\r\n---ORIG---\r\n Title: ${filteredResults[i].title},\r\n Url: ${filteredResults[i].url}`;
 		}
 
 		let removingBookmark = browser.bookmarks.remove(lastBookmark.id);
@@ -55,18 +56,32 @@ function onSearchFulfilled(bookmarkItems) {
 	}
 }
 
+// Takes a string as an input and returns its first part up to (but not including) '#' sym (if there's any in it).
+function sliceAtHash(urlString) {
+	
+	let indexOfHashSym = urlString.indexOf("#"); // Returns -1 if not found
+	return (indexOfHashSym < 0) ? urlString : urlString.slice(0, indexOfHashSym);
+	
+}
+
 function onSearchRejected(error) {
-  console.log(`Search error: ${error}`);
+
+	console.log(`Search error: ${error}`);
+
 }
 
 function onRemoveRejected(error) {
+
 	console.log(`Remove error: ${error}`);
+
 }
 
 function notify(msg) {
+
 	browser.notifications.create({
 		"type": "basic",
 		"title": "Duplicate removed! - Bookmark Detector",
 		"message": msg
 	});
+
 }
