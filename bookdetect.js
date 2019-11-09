@@ -1,5 +1,8 @@
 // No checking of urls at all. Assuming them to be valid and safe since they come from the API.
 
+// Usage of decodeURI is needed for precise results. See https://bugzilla.mozilla.org/show_bug.cgi?id=1595276
+// To be removed when the bug is fixed.
+
 browser.bookmarks.onCreated.addListener(searchForDupes); // Let's keep an eye on created bookmarks by default.
 
 browser.browserAction.setBadgeText({text: "ON"}); // Set default badge text and bkg. (since it's not yet available in manifest).
@@ -27,7 +30,8 @@ function toggleOnOff(){
 function searchForDupes(id, bookmarkInfo) {
 
 	// Consider urls diff only after '#' to be identical -> slice the url at '#' then search.
-	let searching = browser.bookmarks.search(sliceAtHash(bookmarkInfo.url));
+	// URL comes from API so don't catch exceptions of decodeURI
+	let searching = browser.bookmarks.search(decodeURI(sliceAtHash(bookmarkInfo.url)));
 	searching.then(onSearchFulfilled, onSearchRejected);
 
 }
@@ -36,8 +40,9 @@ function searchForDupes(id, bookmarkInfo) {
 function onSearchFulfilled(bookmarkItems) {
 	
 	// Get rid of parts after '#' and filter out urls longer than our fresh one (therefore aren't dupes just are from the same domain).
-	const freshUrlLength = (sliceAtHash(bookmarkItems[bookmarkItems.length - 1].url)).length;
-	let filteredResults = bookmarkItems.filter(bookmark => (((sliceAtHash(bookmark.url)).length) == freshUrlLength));
+	// Using decodeURI to get consistent lengths
+	const freshUrlLength = decodeURI((sliceAtHash(bookmarkItems[bookmarkItems.length - 1].url))).length;
+	let filteredResults = bookmarkItems.filter(bookmark => ((decodeURI(sliceAtHash(bookmark.url))).length == freshUrlLength));
 
 	// Freshly created is the last element of the return array.
 	let lastIdx = filteredResults.length - 1;

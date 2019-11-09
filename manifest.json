@@ -2,7 +2,7 @@
 
   "manifest_version": 2,
   "name": "Bookmark Detector",
-  "version": "0.1",
+  "version": "0.1.2",
 
   "description": "Detects and removes duplicate bookmarks on add and shows a notification about it.",
 
