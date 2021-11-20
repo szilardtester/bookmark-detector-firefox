@@ -5,4 +5,4 @@ A small and simple extension to avoid creating duplicate bookmarks. If a bookmar
 
 *Assuming bookmarks diff only after the '#' symbol to be identical
 
-Add to Firefox (desktop) <a href="https://addons.mozilla.org/en-US/firefox/addon/bookmark-detector/">here</a>.
+Add to Firefox (desktop) <a href="https://addons.mozilla.org/firefox/addon/bookmark-detector/">here</a>.
